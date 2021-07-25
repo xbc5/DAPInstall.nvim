@@ -2,7 +2,7 @@ local config = {}
 
 config.options = {
     installation_path = vim.fn.stdpath("data") .. "/dapinstall/",
-	verbosely_call_debuggers = false,
+    verbosely_call_debuggers = false,
 }
 
 function config.set_options(opts)

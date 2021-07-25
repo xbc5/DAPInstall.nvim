@@ -10,6 +10,7 @@ local dbg_list = require("dap-install.debuggers_list").debuggers
 
 function M.install_debugger(debugger)
     if utils_tbl.tbl_has_element(dbg_list, debugger, "index") then
+        -- TODO: provide auto-install switch here
         if fn.confirm("Do you want to install the debugger " .. debugger .. "?", "&Yes\n&Cancel") ~= 1 then
             return
         end
