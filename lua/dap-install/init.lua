@@ -41,24 +41,31 @@ local function not_installed(debugger)
 end
 
 local function auto_install(debuggers)
+    -- don't do nil check, that's the caller's problem.
+    if type(debuggers) ~= "table" then
+        print("DAPInstall: auto-installed debuggers must be a table (list) or nil")
+        return
+    end
     if #debuggers == 0 then return end
-    -- check is supperted
-    -- check is list
+
+
     local unsupported = {}
     local supported = {}
     for _, d in pairs(debuggers) do
-        if is_supported(d) ~= true then
-            table.insert(unsupported, d)
-        else
+        if is_supported(d) then
             table.insert(supported, d)
+        else
+            table.insert(unsupported, d)
         end
     end
+
 
     if #unsupported > 0 then
         local msg = "DAPInstall: these auto-installed debuggers are either unsupported or incorrect: "
         msg = msg..table.concat(unsupported, ", ")
         print(msg)
     end
+
 
     for _, d in pairs(supported) do
         if not_installed(d) then install(d, true) end
