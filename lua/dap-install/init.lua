@@ -43,7 +43,6 @@ end
 local function auto_install(debuggers)
     if #debuggers == 0 then return end
     -- check is supperted
-    -- check installed already
     -- check is list
     local unsupported = {}
     local supported = {}
@@ -60,12 +59,9 @@ local function auto_install(debuggers)
         msg = msg..table.concat(unsupported, ", ")
         print(msg)
     end
-   
+
     for _, d in pairs(supported) do
-      if not_installed(d) then
-        install(d)
-      end
-      
+        if not_installed(d) then install(d, true) end
     end
 end
 
