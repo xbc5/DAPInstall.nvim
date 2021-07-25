@@ -8,10 +8,10 @@ local utils_tbl = require("dap-install.utils.tables.init")
 local utils_paths = require("dap-install.utils.paths.init")
 local dbg_list = require("dap-install.debuggers_list").debuggers
 
-function M.install_debugger(debugger)
+function M.install_debugger(debugger, assumeyes)
     if utils_tbl.tbl_has_element(dbg_list, debugger, "index") then
         -- TODO: provide auto-install switch here
-        if fn.confirm("Do you want to install the debugger " .. debugger .. "?", "&Yes\n&Cancel") ~= 1 then
+        if not assumeyes and fn.confirm("Do you want to install the debugger " .. debugger .. "?", "&Yes\n&Cancel") ~= 1 then
             return
         end
 

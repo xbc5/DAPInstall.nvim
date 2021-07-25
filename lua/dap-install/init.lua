@@ -3,6 +3,8 @@ local M = {}
 local dap = require("dap")
 local utils_tbl = require("dap-install.utils.tables.init")
 local utils_paths = require("dap-install.utils.paths.init")
+local dbg_list = require("dap-install.debuggers_list").debuggers
+local install = require("dap-install.tools.tool_install.init")
 
 function M.setup(custom_opts)
     require("dap-install.config").set_options(custom_opts)
@@ -25,20 +27,63 @@ local function call_on_dap(debugger, dbg_list, user_config)
     end
 end
 
+-- TODO: move me to a module
+local function is_supported(debugger)
+    return utils_tbl.tbl_has_element(dbg_list, debugger, "index")
+end
+
+local function is_installed(debugger)
+  return utils_paths.assert_dir(dbg_list[debugger][2]) == 1
+end
+
+local function not_installed(debugger)
+  return is_installed(debugger) == false
+end
+
+local function auto_install(debuggers)
+    if #debuggers == 0 then return end
+    -- check is supperted
+    -- check installed already
+    -- check is list
+    local unsupported = {}
+    local supported = {}
+    for _, d in pairs(debuggers) do
+        if is_supported(d) ~= true then
+            table.insert(unsupported, d)
+        else
+            table.insert(supported, d)
+        end
+    end
+
+    if #unsupported > 0 then
+        local msg = "DAPInstall: these auto-installed debuggers are either unsupported or incorrect: "
+        msg = msg..table.concat(unsupported, ", ")
+        print(msg)
+    end
+   
+    for _, d in pairs(supported) do
+      if not_installed(d) then
+        install(d)
+      end
+      
+    end
+end
+
 -- The configuration function called directly from the user's config.
 -- @param debugger - the deugger name, a key for the debuggers_list.
 -- @param config - a debugger conguration table, as specified in the installation docs.
 function M.config(debugger, config)
     config = config or {}
-    local dbg_list = require("dap-install.debuggers_list").debuggers
+    local options = require("dap-install.config").options["verbosely_call_debuggers"]
 
     -- TODO: check autoinstall bool here, then do install if true.
+    if options.auto_install then auto_install(options.auto_install) end
 
-    if (require("dap-install.config").options["verbosely_call_debuggers"] == true) then
+    if (options.verbosely_call_debuggers == true) then
         print("DAPInstall: Passing the " .. debugger .. " to nvim-dap...")
     end
 
-    if utils_tbl.tbl_has_element(dbg_list, debugger, "index") then
+    if is_supported(debugger) then
         if (utils_paths.assert_dir(dbg_list[debugger][2]) == 1) then
             call_on_dap(debugger, dbg_list, config)
         else
